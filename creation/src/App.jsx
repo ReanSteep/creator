@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
-import Counter from './pages/Counter'
+import Counter from './pages/Counter.jsx'
 import ForgotPassword from './pages/ForgotPassword'
 
 function App() {
