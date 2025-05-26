@@ -1,46 +1,35 @@
 import { useParams, useLocation, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-// Temporary mock data
-const mockServerData = {
-  name: "Test Server",
-  folders: [
-    { 
-      id: 1, 
-      name: "Folder 1",
-      expanded: true,
-      tabs: [
-        { id: 101, name: "Tab 1" },
-        { id: 102, name: "Tab 2" }
-      ]
-    },
-    { 
-      id: 2, 
-      name: "Folder 2",
-      expanded: false,
-      tabs: [
-        { id: 201, name: "Tab 3" },
-        { id: 202, name: "Tab 4" }
-      ]
-    }
-  ],
-  tabs: [
-    { id: 301, name: "Tab 5" },
-    { id: 302, name: "Tab 6" }
-  ]
-};
-
 export default function FolderTabList() {
   const { serverId, tabId } = useParams();
   const location = useLocation();
   
-  const [serverData, setServerData] = useState(mockServerData);
+  // Store server data in a map where each server has its own folders and tabs
+  const [serverDataMap, setServerDataMap] = useState({});
   const [draggedTab, setDraggedTab] = useState(null);
   const [draggedFolder, setDraggedFolder] = useState(null);
   const [showFolderInput, setShowFolderInput] = useState(false);
   const [showTabInput, setShowTabInput] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [newTabName, setNewTabName] = useState("");
+
+  // Initialize server data if it doesn't exist
+  useEffect(() => {
+    if (serverId && !serverDataMap[serverId]) {
+      setServerDataMap(prev => ({
+        ...prev,
+        [serverId]: {
+          name: `Server ${serverId}`,
+          folders: [],
+          tabs: []
+        }
+      }));
+    }
+  }, [serverId]);
+
+  // Get current server data
+  const serverData = serverDataMap[serverId] || { folders: [], tabs: [] };
 
   // Create folder
   const handleCreateFolder = () => {
@@ -53,9 +42,12 @@ export default function FolderTabList() {
       tabs: []
     };
     
-    setServerData(prev => ({
+    setServerDataMap(prev => ({
       ...prev,
-      folders: [...prev.folders, newFolder]
+      [serverId]: {
+        ...prev[serverId],
+        folders: [...prev[serverId].folders, newFolder]
+      }
     }));
     setNewFolderName("");
     setShowFolderInput(false);
@@ -70,9 +62,12 @@ export default function FolderTabList() {
       name: newTabName.trim()
     };
     
-    setServerData(prev => ({
+    setServerDataMap(prev => ({
       ...prev,
-      tabs: [...prev.tabs, newTab]
+      [serverId]: {
+        ...prev[serverId],
+        tabs: [...prev[serverId].tabs, newTab]
+      }
     }));
     setNewTabName("");
     setShowTabInput(false);
@@ -80,11 +75,14 @@ export default function FolderTabList() {
 
   // Toggle folder expanded state
   const toggleFolder = (folderId) => {
-    setServerData(prev => ({
+    setServerDataMap(prev => ({
       ...prev,
-      folders: prev.folders.map(f => 
-        f.id === folderId ? { ...f, expanded: !f.expanded } : f
-      )
+      [serverId]: {
+        ...prev[serverId],
+        folders: prev[serverId].folders.map(f => 
+          f.id === folderId ? { ...f, expanded: !f.expanded } : f
+        )
+      }
     }));
   };
 
@@ -96,13 +94,14 @@ export default function FolderTabList() {
   const onTabDrop = (folderId) => {
     if (!draggedTab) return;
 
-    setServerData(prev => {
+    setServerDataMap(prev => {
+      const currentServer = prev[serverId];
       // Remove from old location
-      let newFolders = prev.folders.map(f => ({ 
+      let newFolders = currentServer.folders.map(f => ({ 
         ...f, 
         tabs: f.tabs.filter(t => t.id !== draggedTab.id) 
       }));
-      let newTabs = prev.tabs.filter(t => t.id !== draggedTab.id);
+      let newTabs = currentServer.tabs.filter(t => t.id !== draggedTab.id);
       
       // Add to new folder
       newFolders = newFolders.map(f =>
@@ -111,8 +110,11 @@ export default function FolderTabList() {
       
       return {
         ...prev,
-        folders: newFolders,
-        tabs: newTabs
+        [serverId]: {
+          ...currentServer,
+          folders: newFolders,
+          tabs: newTabs
+        }
       };
     });
     setDraggedTab(null);
@@ -121,18 +123,22 @@ export default function FolderTabList() {
   const onTabDropOutside = () => {
     if (!draggedTab) return;
 
-    setServerData(prev => {
+    setServerDataMap(prev => {
+      const currentServer = prev[serverId];
       // Remove from old location
-      let newFolders = prev.folders.map(f => ({ 
+      let newFolders = currentServer.folders.map(f => ({ 
         ...f, 
         tabs: f.tabs.filter(t => t.id !== draggedTab.id) 
       }));
-      let newTabs = [...prev.tabs, draggedTab];
+      let newTabs = [...currentServer.tabs, draggedTab];
       
       return {
         ...prev,
-        folders: newFolders,
-        tabs: newTabs
+        [serverId]: {
+          ...currentServer,
+          folders: newFolders,
+          tabs: newTabs
+        }
       };
     });
     setDraggedTab(null);
@@ -153,19 +159,24 @@ export default function FolderTabList() {
     newFolders.splice(idx, 1);
     newFolders.splice(targetIdx, 0, draggedFolder);
     
-    setServerData(prev => ({
+    setServerDataMap(prev => ({
       ...prev,
-      folders: newFolders
+      [serverId]: {
+        ...prev[serverId],
+        folders: newFolders
+      }
     }));
     setDraggedFolder(null);
   };
+
+  if (!serverId) return null;
 
   return (
     <div style={{ background: "#181a1b", minHeight: "100vh", width: 220, padding: 0, display: "flex", flexDirection: "column" }}>
       {/* Server name */}
       <div style={{ display: "flex", alignItems: "center", padding: "20px 16px 10px 16px" }}>
         <div style={{ width: 36, height: 36, background: "#66c0f4", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: 20, color: "#23272b", marginRight: 12 }}>
-          {serverData.name[0]}
+          {serverData.name?.[0]}
         </div>
         <span style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>{serverData.name}</span>
       </div>
