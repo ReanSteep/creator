@@ -1,17 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-// Temporary mock data
-const mockServers = [
-  { id: 1, name: "Server 1", owner_id: "1" },
-  { id: 2, name: "Server 2", owner_id: "2" },
-  { id: 3, name: "Server 3", owner_id: "1" }
-];
-
 export default function ServerList() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [servers, setServers] = useState(mockServers);
+  const [servers, setServers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [newServerName, setNewServerName] = useState("");
   const [draggedServer, setDraggedServer] = useState(null);
