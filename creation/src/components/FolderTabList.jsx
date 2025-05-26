@@ -5,7 +5,7 @@ import axios from "axios";
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3001";
 
 export default function FolderTabList() {
-  const { serverId, channelId } = useParams();
+  const { serverId, tabId } = useParams();
   const location = useLocation();
   
   const [serverData, setServerData] = useState(null);
@@ -342,7 +342,7 @@ export default function FolderTabList() {
                 {folder.expanded && (
                   <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                     {folder.tabs.map(tab => {
-                      const isActive = location.pathname.endsWith(`/channel/${tab.id}`);
+                      const isActive = location.pathname.endsWith(`/tab/${tab.id}`);
                       return (
                         <li
                           key={tab.id}
@@ -352,7 +352,7 @@ export default function FolderTabList() {
                           onDrop={e => e.stopPropagation()}
                         >
                           <Link
-                            to={`/server/${serverId}/channel/${tab.id}`}
+                            to={`/server/${serverId}/tab/${tab.id}`}
                             style={{
                               display: "block",
                               margin: "6px 12px",
@@ -385,7 +385,7 @@ export default function FolderTabList() {
               onDrop={onTabDropOutside}
             >
               {tabs.map(tab => {
-                const isActive = location.pathname.endsWith(`/channel/${tab.id}`);
+                const isActive = location.pathname.endsWith(`/tab/${tab.id}`);
                 return (
                   <li
                     key={tab.id}
@@ -395,7 +395,7 @@ export default function FolderTabList() {
                     onDrop={e => e.stopPropagation()}
                   >
                     <Link
-                      to={`/server/${serverId}/channel/${tab.id}`}
+                      to={`/server/${serverId}/tab/${tab.id}`}
                       style={{
                         display: "block",
                         margin: "6px 12px",

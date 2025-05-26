@@ -14,7 +14,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/" element={<Home />} />
         <Route path="/server/:serverId" element={<Server />}/>
-        <Route path="/server/:serverId/channel/:channelId" element={<Server />}/>
+        <Route path="/server/:serverId/tab/:tabId" element={<Server />}/>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
