@@ -11,28 +11,10 @@ function MainApp() {
   };
   return (
     <>
-      <div style={{ color: '#fff', padding: 32 }}>Welcome to the app!</div>
+      <div className="text-white p-8">Welcome to the app!</div>
       <button
-        className="logout-btn"
+        className="fixed bottom-8 right-8 bg-[#23272f] border border-[#353945] text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-blue-700 transition-colors duration-150 z-50"
         onClick={handleLogout}
-        style={{
-          position: 'fixed',
-          right: 32,
-          bottom: 32,
-          background: 'rgba(40,44,52,0.95)',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 12,
-          padding: '14px 28px',
-          fontSize: '1rem',
-          fontWeight: 600,
-          boxShadow: '0 4px 16px rgba(31,38,135,0.15)',
-          cursor: 'pointer',
-          zIndex: 1000,
-          transition: 'background 0.2s',
-        }}
-        onMouseOver={e => (e.currentTarget.style.background = '#4f8cff')}
-        onMouseOut={e => (e.currentTarget.style.background = 'rgba(40,44,52,0.95)')}
       >
         Logout
       </button>
@@ -42,7 +24,7 @@ function MainApp() {
 
 function App() {
   const { user, loading } = useAuth();
-  if (loading) return <div style={{ color: '#fff' }}>Loading...</div>;
+  if (loading) return <div className="text-white">Loading...</div>;
   return user ? <MainApp /> : <LoginPage />;
 }
 
