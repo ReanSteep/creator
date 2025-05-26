@@ -17,8 +17,9 @@ export default function TabEditor({ value, onChange }) {
       text: type === "text" ? "Edit me" : undefined,
       url: type === "image" ? "https://placehold.co/100x100" : undefined,
       color: type === "shape" ? "#66c0f4" : undefined,
-      width: 100,
-      height: 40,
+      messages: type === "chat" ? [] : undefined,
+      width: type === "chat" ? 300 : 100,
+      height: type === "chat" ? 400 : 40,
     };
     setElements([...elements, newEl]);
     onChange && onChange([...elements, newEl]);
@@ -53,6 +54,18 @@ export default function TabEditor({ value, onChange }) {
     onChange && onChange(elements.map(el => el.id === id ? { ...el, url } : el));
   };
 
+  // Add chat message
+  const addChatMessage = (id, message) => {
+    setElements(els => els.map(el => {
+      if (el.id === id) {
+        const newMessages = [...(el.messages || []), { text: message, timestamp: new Date().toISOString() }];
+        return { ...el, messages: newMessages };
+      }
+      return el;
+    }));
+    onChange && onChange(elements);
+  };
+
   return (
     <div style={{ position: "relative", width: "100%", height: 500, background: "#f4f4f4", borderRadius: 8, overflow: "hidden", margin: "24px 0" }}
       onMouseMove={onDrag}
@@ -63,6 +76,7 @@ export default function TabEditor({ value, onChange }) {
         <button onClick={() => addElement("text")}>Add Text</button>
         <button onClick={() => addElement("image")}>Add Image</button>
         <button onClick={() => addElement("shape")}>Add Shape</button>
+        <button onClick={() => addElement("chat")}>Add Chat</button>
       </div>
       {/* Elements */}
       {elements.map(el => (
@@ -99,6 +113,63 @@ export default function TabEditor({ value, onChange }) {
           )}
           {el.type === "shape" && (
             <div style={{ width: el.width, height: el.height, background: el.color, borderRadius: 6, border: "1px solid #aaa" }} />
+          )}
+          {el.type === "chat" && (
+            <div style={{ 
+              width: el.width, 
+              height: el.height, 
+              background: "white", 
+              borderRadius: 6, 
+              border: "1px solid #aaa",
+              display: "flex",
+              flexDirection: "column"
+            }}>
+              {/* Chat messages */}
+              <div style={{ 
+                flex: 1, 
+                overflowY: "auto", 
+                padding: 10,
+                display: "flex",
+                flexDirection: "column",
+                gap: 8
+              }}>
+                {(el.messages || []).map((msg, i) => (
+                  <div key={i} style={{
+                    background: "#f0f0f0",
+                    padding: "8px 12px",
+                    borderRadius: 12,
+                    maxWidth: "80%",
+                    alignSelf: "flex-start"
+                  }}>
+                    {msg.text}
+                  </div>
+                ))}
+              </div>
+              {/* Chat input */}
+              <div style={{ 
+                borderTop: "1px solid #eee", 
+                padding: 10,
+                display: "flex",
+                gap: 8
+              }}>
+                <input
+                  placeholder="Type a message..."
+                  style={{ 
+                    flex: 1,
+                    padding: "8px 12px",
+                    borderRadius: 20,
+                    border: "1px solid #ddd",
+                    outline: "none"
+                  }}
+                  onKeyPress={e => {
+                    if (e.key === 'Enter' && e.target.value.trim()) {
+                      addChatMessage(el.id, e.target.value.trim());
+                      e.target.value = '';
+                    }
+                  }}
+                />
+              </div>
+            </div>
           )}
         </div>
       ))}
