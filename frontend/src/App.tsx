@@ -1,36 +1,22 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { MantineProvider } from '@mantine/core';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import AuthProvider from './providers/AuthProvider';
+import { AuthProvider, useAuth } from './auth/AuthProvider';
+import LoginPage from './components/LoginPage';
+import './App.css';
 
-const queryClient = new QueryClient();
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <MantineProvider
-        theme={{
-          colorScheme: 'dark',
-          colors: {
-            'steam-dark': ['#171a21', '#171a21', '#171a21', '#171a21', '#171a21', '#171a21', '#171a21', '#171a21', '#171a21', '#171a21'],
-            'steam-light': ['#1b2838', '#1b2838', '#1b2838', '#1b2838', '#1b2838', '#1b2838', '#1b2838', '#1b2838', '#1b2838', '#1b2838'],
-            'steam-blue': ['#66c0f4', '#66c0f4', '#66c0f4', '#66c0f4', '#66c0f4', '#66c0f4', '#66c0f4', '#66c0f4', '#66c0f4', '#66c0f4'],
-          },
-        }}
-      >
-        <Router>
-          <AuthProvider>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/" element={<Dashboard />} />
-            </Routes>
-          </AuthProvider>
-        </Router>
-      </MantineProvider>
-    </QueryClientProvider>
-  );
+function MainApp() {
+  // Placeholder for post-login UI
+  return <div style={{ color: '#fff', padding: 32 }}>Welcome to the app!</div>;
 }
 
-export default App;
+function App() {
+  const { user, loading } = useAuth();
+  if (loading) return <div style={{ color: '#fff' }}>Loading...</div>;
+  return user ? <MainApp /> : <LoginPage />;
+}
+
+export default function RootApp() {
+  return (
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  );
+}
