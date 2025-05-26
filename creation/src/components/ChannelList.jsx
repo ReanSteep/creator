@@ -1,4 +1,4 @@
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 const defaultFolders = [
@@ -250,8 +250,10 @@ export default function ChannelList() {
                       onDragOver={e => e.preventDefault()}
                       onDrop={e => e.stopPropagation()}
                     >
-                      <div
+                      <Link
+                        to={`/server/${serverId}/channel/${tab.id}`}
                         style={{
+                          display: "block",
                           margin: "6px 12px",
                           padding: "8px 16px",
                           background: isActive ? "#181a1b" : "#23272b",
@@ -266,7 +268,7 @@ export default function ChannelList() {
                         }}
                       >
                         # {tab.name}
-                      </div>
+                      </Link>
                     </li>
                   );
                 })}
@@ -290,8 +292,10 @@ export default function ChannelList() {
                 onDragOver={e => e.preventDefault()}
                 onDrop={e => e.stopPropagation()}
               >
-                <div
+                <Link
+                  to={`/server/${serverId}/channel/${tab.id}`}
                   style={{
+                    display: "block",
                     margin: "6px 12px",
                     padding: "8px 16px",
                     background: isActive ? "#181a1b" : "#23272b",
@@ -306,7 +310,7 @@ export default function ChannelList() {
                   }}
                 >
                   # {tab.name}
-                </div>
+                </Link>
               </li>
             );
           })}
