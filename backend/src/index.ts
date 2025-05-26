@@ -2,10 +2,13 @@
 import cors from '@fastify/cors';
 import Fastify from 'fastify';
 import type { FastifyInstance } from 'fastify';
+import wsRoutes from './routes/wsRoutes';
 
 const server: FastifyInstance = Fastify();
 
 server.register(cors, { origin: true });
+
+server.register(wsRoutes);
 
 server.get('/health', async () => {
   return { status: 'ok' };
