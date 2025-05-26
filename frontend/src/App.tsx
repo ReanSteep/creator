@@ -13,7 +13,7 @@ function MainApp() {
     <>
       <div className="text-white p-8">Welcome to the app!</div>
       <button
-        className="fixed bottom-8 right-8 bg-[#23272f] border border-[#353945] text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-blue-700 transition-colors duration-150 z-50"
+        className="fixed bottom-8 right-8 bg-white/5 border border-white/10 text-white font-bold font-mono py-3 px-10 rounded-xl shadow-xl uppercase tracking-wider hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-150 z-50 backdrop-blur-lg"
         onClick={handleLogout}
       >
         Logout
