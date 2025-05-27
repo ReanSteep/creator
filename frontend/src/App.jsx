@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+import { supabase } from './supabaseClient'
+import Chat from './components/Chat'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -25,15 +20,6 @@ function App() {
       listener.subscription.unsubscribe()
     }
   }, [])
-
-  useEffect(() => {
-    // Log the JWT (access token) after login
-    supabase.auth.getSession().then(({ data }) => {
-      if (data?.session?.access_token) {
-        console.log('Your Supabase JWT:', data.session.access_token);
-      }
-    });
-  }, [user]);
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -72,12 +58,12 @@ function App() {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: 'auto', padding: 32 }}>
-      <h2>Welcome, {user.email}</h2>
-      <button onClick={handleLogout} style={{ padding: 8 }}>Logout</button>
-      <div style={{ marginTop: 32 }}>
-        <p>Dashboard placeholder (protected)</p>
+    <div>
+      <div style={{ padding: '10px 20px', borderBottom: '1px solid #ccc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2>Welcome, {user.email}</h2>
+        <button onClick={handleLogout} style={{ padding: '8px 16px' }}>Logout</button>
       </div>
+      <Chat />
     </div>
   )
 }

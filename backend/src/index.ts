@@ -1,17 +1,27 @@
 import Fastify from 'fastify';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
+import { setupMessageWebSocket } from './websocket/messageHandler.js';
+import { ready } from './crypto.js';
 
 dotenv.config();
+
+// Initialize libsodium
+await ready();
 
 const fastify = Fastify({
   logger: true,
 });
 
+// Register WebSocket plugin
+await fastify.register(import('@fastify/websocket'));
+
+// Health check
 fastify.get('/health', async () => {
   return { status: 'ok' };
 });
 
+// Protected route example
 fastify.get('/protected', async (request, reply) => {
   const auth = request.headers['authorization'];
   if (!auth || !auth.startsWith('Bearer ')) {
@@ -28,6 +38,9 @@ fastify.get('/protected', async (request, reply) => {
     return reply.status(401).send({ error: 'Invalid token' });
   }
 });
+
+// Setup WebSocket routes
+setupMessageWebSocket(fastify);
 
 const start = async () => {
   try {
