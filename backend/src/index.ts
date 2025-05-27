@@ -3,7 +3,7 @@ import Fastify from 'fastify';
 import type { FastifyInstance } from 'fastify';
 import wsRoutes from './routes/wsRoutes';
 import authRoutes from './routes/authRoutes';
-import blockRoutes from './routes/blockRoutes';
+import { blockRoutes } from './routes/blockRoutes';
 import pageRoutes from './routes/pageRoutes';
 import folderRoutes from './routes/folderRoutes';
 import fileRoutes from './routes/fileRoutes';
@@ -13,16 +13,23 @@ const server: FastifyInstance = Fastify({
   logger: true
 });
 
-// Register plugins
-server.register(cors, { origin: true });
+// Register plugins with more permissive CORS
+server.register(cors, {
+  origin: true, // Allow all origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  preflight: true,
+  preflightContinue: false
+});
 
 // Register routes
-server.register(authRoutes, { prefix: '/auth' });
-server.register(blockRoutes, { prefix: '/blocks' });
-server.register(pageRoutes, { prefix: '/pages' });
-server.register(folderRoutes, { prefix: '/folders' });
-server.register(fileRoutes, { prefix: '/files' });
-server.register(pluginRoutes, { prefix: '/plugins' });
+server.register(authRoutes, { prefix: '/api/auth' });
+server.register(blockRoutes, { prefix: '/api' });
+server.register(pageRoutes, { prefix: '/api/pages' });
+server.register(folderRoutes, { prefix: '/api/folders' });
+server.register(fileRoutes, { prefix: '/api/files' });
+server.register(pluginRoutes, { prefix: '/api/plugins' });
 server.register(wsRoutes);
 
 server.get('/health', async () => {

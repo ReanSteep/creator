@@ -15,11 +15,14 @@
     "@fastify/cors": "^7.0.0",
     "@fastify/jwt": "^5.0.0",
     "@fastify/websocket": "^11.1.0",
-    "fastify": "^4.0.0",
-    "fastify-plugin": "^4.5.0"
+    "@prisma/client": "^6.8.2",
+    "fastify": "^4.29.1",
+    "fastify-plugin": "^4.5.0",
+    "zod": "^3.25.30"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/ws": "^8.18.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
