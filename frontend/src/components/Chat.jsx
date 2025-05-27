@@ -56,26 +56,47 @@ function Chat() {
 
   useEffect(() => {
     if (selectedUser) {
-      // Subscribe to new messages
-      const subscription = supabase
-        .channel('messages')
-        .on('postgres_changes', {
-          event: '*',  // Listen for all events (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'messages',
-          filter: `sender_id=eq.${selectedUser.id},receiver_id=eq.${selectedUser.id}`,
-        }, (payload) => {
-          console.log('New message received:', payload);
-          if (payload.eventType === 'INSERT') {
-            setMessages((current) => [...current, payload.new]);
-          }
-        })
-        .subscribe();
-
-      // Fetch existing messages
-      const fetchMessages = async () => {
+      const setupSubscription = async () => {
         try {
           const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+
+          console.log('Setting up subscription for users:', { currentUser: user.id, selectedUser: selectedUser.id });
+
+          // Subscribe to new messages
+          const channel = supabase
+            .channel('messages')
+            .on(
+              'postgres_changes',
+              {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages',
+                filter: `or(and(sender_id.eq.${user.id},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${user.id}))`,
+              },
+              (payload) => {
+                console.log('New message received:', payload);
+                setMessages((current) => {
+                  // Check if message already exists to avoid duplicates
+                  const messageExists = current.some(msg => msg.id === payload.new.id);
+                  if (messageExists) {
+                    return current;
+                  }
+                  const newMessages = [...current, payload.new];
+                  console.log('Updated messages:', newMessages);
+                  return newMessages;
+                });
+              }
+            )
+            .subscribe((status) => {
+              console.log('Subscription status:', status);
+              if (status === 'CHANNEL_ERROR') {
+                console.error('Channel error occurred');
+                setError('Failed to establish real-time connection. Please refresh the page.');
+              }
+            });
+
+          // Fetch existing messages
           const { data: messages, error } = await supabase
             .from('messages')
             .select('*')
@@ -83,18 +104,20 @@ function Chat() {
             .order('created_at', { ascending: true });
           
           if (error) throw error;
+          console.log('Fetched existing messages:', messages);
           setMessages(messages || []);
+
+          return () => {
+            console.log('Cleaning up subscription');
+            channel.unsubscribe();
+          };
         } catch (err) {
-          console.error('Error fetching messages:', err);
-          setError('Failed to load messages. Please try again later.');
+          console.error('Error setting up chat:', err);
+          setError('Failed to load chat. Please try again later.');
         }
       };
 
-      fetchMessages();
-
-      return () => {
-        subscription.unsubscribe();
-      };
+      setupSubscription();
     }
   }, [selectedUser]);
 
@@ -113,7 +136,13 @@ function Chat() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      const { error } = await supabase
+      console.log('Sending message:', {
+        sender_id: user.id,
+        receiver_id: selectedUser.id,
+        content: newMessage
+      });
+
+      const { data, error } = await supabase
         .from('messages')
         .insert([
           {
@@ -121,9 +150,18 @@ function Chat() {
             receiver_id: selectedUser.id,
             content: newMessage,
           },
-        ]);
+        ])
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error sending message:', error);
+        throw error;
+      }
+      
+      console.log('Message sent successfully:', data);
+      // Add the new message to the state immediately
+      setMessages(current => [...current, data]);
       setNewMessage('');
     } catch (err) {
       console.error('Error sending message:', err);
