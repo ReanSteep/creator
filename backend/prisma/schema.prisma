@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Keys (E2EE setup)
+model user_keys {
+  id          String   @id @default(uuid())
+  user_id     String
+  public_key  String
+  key_version Int      @default(1)
+  created_at  DateTime @default(now())
+  @@unique([user_id, key_version])
+}
+
+model folders {
+  id             String   @id @default(uuid())
+  name           String
+  encrypted_name Bytes?
+  owner_id       String
+  position       Int      @default(0)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @default(now())
+  tabs           tabs[]
+}
+
+model tabs {
+  id             String   @id @default(uuid())
+  encrypted_name Bytes
+  folder_id      String?
+  owner_id       String
+  slug           String?  @unique
+  created_at     DateTime @default(now())
+  updated_at     DateTime @default(now())
+  folder         folders? @relation(fields: [folder_id], references: [id], onDelete: SetNull)
+  blocks         blocks[]
+  file_metadata  file_metadata[]
+}
+
+model blocks {
+  id               String   @id @default(uuid())
+  tab_id           String
+  owner_id         String
+  type             String
+  layout           Json    @default("{}")
+  style            Json    @default("{}")
+  encrypted_content Bytes
+  position         Int      @default(0)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @default(now())
+  tab              tabs     @relation(fields: [tab_id], references: [id], onDelete: Cascade)
+}
+
+model file_metadata {
+  id             String   @id @default(uuid())
+  encrypted_name Bytes
+  encrypted_key  Bytes
+  minio_path     String
+  size_bytes     BigInt
+  mime_type      String?
+  owner_id       String
+  tab_id         String
+  created_at     DateTime @default(now())
+  tab            tabs     @relation(fields: [tab_id], references: [id], onDelete: Cascade)
+}
+
+model plugin_configs {
+  id          String   @id @default(uuid())
+  name        String
+  version     String
+  entry_point String
+  permissions Json    @default("{}")
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+}
+
+model user_settings {
+  user_id              String   @id
+  message_retention_days Int?
+  theme                String   @default("dark")
+  notifications_enabled Boolean  @default(true)
+  encrypted_preferences Bytes?
+  updated_at           DateTime @default(now())
+}
+
+model workspace_members {
+  workspace_id      String
+  user_id           String
+  role              String   @default("member")
+  encrypted_metadata Bytes?
+  joined_at         DateTime @default(now())
+  @@id([workspace_id, user_id])
+}
