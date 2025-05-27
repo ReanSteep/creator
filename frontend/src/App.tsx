@@ -1,40 +1,35 @@
-import { AuthProvider, useAuth } from './auth/AuthProvider';
-import { supabase } from './auth/supabaseClient';
-import LoginPage from './components/LoginPage';
-import './App.css';
-
-function MainApp() {
-  // Logout handler
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.reload();
-  };
-  return (
-    <div className="app-bg">
-      <div className="main-app-panel">
-        <div className="main-app-title">Welcome to the app!</div>
-        <button
-          className="fixed bottom-8 right-8 bg-white/5 border border-white/10 text-white font-bold font-mono py-3 px-10 rounded-xl shadow-xl uppercase tracking-wider hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-150 z-50 backdrop-blur-lg"
-          style={{position: 'fixed', bottom: 32, right: 32, background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.10)', color: '#e3e6ea', fontWeight: 700, fontFamily: 'Roboto Mono, monospace', borderRadius: '1rem', boxShadow: '0 4px 24px 0 rgba(31,38,135,0.18)', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '0.9rem 2.5rem', zIndex: 1000, cursor: 'pointer', transition: 'background 0.2s'}}
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
-      </div>
-    </div>
-  );
-}
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
 
 function App() {
-  const { user, loading } = useAuth();
-  if (loading) return <div className="text-white">Loading...</div>;
-  return user ? <MainApp /> : <LoginPage />;
+  const [count, setCount] = useState(0)
+
+  return (
+    <>
+      <div>
+        <a href="https://vite.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </a>
+      </div>
+      <h1>Vite + React</h1>
+      <div className="card">
+        <button onClick={() => setCount((count) => count + 1)}>
+          count is {count}
+        </button>
+        <p>
+          Edit <code>src/App.tsx</code> and save to test HMR
+        </p>
+      </div>
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+    </>
+  )
 }
 
-export default function RootApp() {
-  return (
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  );
-}
+export default App
