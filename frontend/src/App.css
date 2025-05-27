@@ -273,3 +273,30 @@ body {
   background: #3a4a6a;
   cursor: not-allowed;
 }
+
+.logout-btn-fixed {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 1000;
+}
+
+.logout-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.10);
+  color: #e3e6ea;
+  font-weight: 700;
+  font-family: 'Roboto Mono', monospace;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px 0 rgba(31,38,135,0.18);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.9rem 2.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 1.08rem;
+  outline: none;
+}
+.logout-btn:hover {
+  background: rgba(255,255,255,0.12);
+}

@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserKey {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  publicKey  String   @map("public_key")
+  keyVersion Int      @default(1) @map("key_version")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("user_keys")
+  @@unique([userId, keyVersion])
+}
+
+model Folder {
+  id            String    @id @default(uuid())
+  name          String
+  encryptedName Bytes?    @map("encrypted_name")
+  ownerId       String    @map("owner_id")
+  position      Int       @default(0)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  pageTabs      PageTab[]
+
+  @@map("folders")
+}
+
+model PageTab {
+  id            String    @id @default(uuid())
+  encryptedName Bytes     @map("encrypted_name")
+  folderId      String?   @map("folder_id")
+  ownerId       String    @map("owner_id")
+  slug          String?   @unique
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  folder        Folder?   @relation(fields: [folderId], references: [id])
+  blocks        Block[]
+  files         FileMetadata[]
+
+  @@map("pagetabs")
+}
+
+model Block {
+  id                String   @id @default(uuid())
+  pageTabId         String   @map("pagetab_id")
+  ownerId           String   @map("owner_id")
+  type              String
+  layout            Json     @default("{}")
+  style             Json     @default("{}")
+  encryptedContent  Bytes    @map("encrypted_content")
+  position          Int      @default(0)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  pageTab           PageTab  @relation(fields: [pageTabId], references: [id], onDelete: Cascade)
+
+  @@map("blocks")
+}
+
+model FileMetadata {
+  id            String   @id @default(uuid())
+  encryptedName Bytes    @map("encrypted_name")
+  encryptedKey  Bytes    @map("encrypted_key")
+  minioPath     String   @map("minio_path")
+  sizeBytes     BigInt   @map("size_bytes")
+  mimeType      String?  @map("mime_type")
+  ownerId       String   @map("owner_id")
+  pageTabId     String   @map("pagetab_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  pageTab       PageTab  @relation(fields: [pageTabId], references: [id])
+
+  @@map("file_metadata")
+}
+
+model PluginConfig {
+  id          String   @id @default(uuid())
+  name        String
+  version     String
+  entryPoint  String   @map("entry_point")
+  permissions Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("plugin_configs")
+}
+
+model UserSetting {
+  userId              String   @id @map("user_id")
+  messageRetentionDays Int?    @map("message_retention_days")
+  theme               String?  @default("dark")
+  notificationsEnabled Boolean @default(true) @map("notifications_enabled")
+  encryptedPreferences Bytes?  @map("encrypted_preferences")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@map("user_settings")
+}
+
+model WorkspaceMember {
+  workspaceId      String   @map("workspace_id")
+  userId           String   @map("user_id")
+  role             String   @default("member")
+  encryptedMetadata Bytes?  @map("encrypted_metadata")
+  joinedAt         DateTime @default(now()) @map("joined_at")
+
+  @@id([workspaceId, userId])
+  @@map("workspace_members")
+} 
