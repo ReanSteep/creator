@@ -26,6 +26,15 @@ function App() {
     }
   }, [])
 
+  useEffect(() => {
+    // Log the JWT (access token) after login
+    supabase.auth.getSession().then(({ data }) => {
+      if (data?.session?.access_token) {
+        console.log('Your Supabase JWT:', data.session.access_token);
+      }
+    });
+  }, [user]);
+
   const handleLogin = async (e) => {
     e.preventDefault()
     setLoading(true)

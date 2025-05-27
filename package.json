@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/ReanSteep/creator/issues"
   },
-  "homepage": "https://github.com/ReanSteep/creator#readme"
+  "homepage": "https://github.com/ReanSteep/creator#readme",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
+  }
 }
