@@ -11,14 +11,17 @@ datasource db {
 }
 
 model user_keys {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id     String?   @db.Uuid
-  public_key  String
-  key_version Int       @default(1)
-  created_at  DateTime? @default(now()) @db.Timestamptz(6)
-  user        users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id              String?   @db.Uuid
+  public_key           String
+  encrypted_private_key String
+  salt                 String
+  nonce                String
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime? @default(now()) @updatedAt @db.Timestamptz(6)
+  user                 users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([user_id, key_version])
+  @@unique([user_id])
   @@schema("public")
 }
 
@@ -492,15 +495,42 @@ enum one_time_token_type {
 }
 
 model messages {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sender_id   String    @db.Uuid
-  receiver_id String    @db.Uuid
-  content     String
-  created_at  DateTime? @default(now()) @db.Timestamptz(6)
-  sender      users     @relation("SentMessages", fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  receiver    users     @relation("ReceivedMessages", fields: [receiver_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sender_id        String?   @db.Uuid
+  receiver_id      String?   @db.Uuid
+  encrypted_content String
+  nonce            String
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @updatedAt @db.Timestamptz(6)
+  sender           users?    @relation("SentMessages", fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  receiver         users?    @relation("ReceivedMessages", fields: [receiver_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([sender_id])
   @@index([receiver_id])
   @@schema("public")
+}
+
+model chat_shared_keys {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  chat_id              String
+  user_id              String?   @db.Uuid
+  encrypted_shared_key String
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime? @default(now()) @updatedAt @db.Timestamptz(6)
+  user                 users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([chat_id, user_id])
+  @@schema("public")
+}
+
+model Message {
+  id                String   @id @default(uuid())
+  sender_id        String
+  receiver_id      String
+  encrypted_content String
+  nonce            String
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@map("messages")
 }
